@@ -1,0 +1,7 @@
+module.exports = {
+  GOOGLE_AUTH_CLIENT_KEY: '37361668095-bhna113hnh345ot5rpj7ddhfcubsr6sa.apps.googleusercontent.com',
+  JWT_SECRET: 'RNHJ7T0GmxLmIjLqmEgBruKDu8AwfSTIOPuqi26hZMYgZK9sXvgSwcv17eH3o6kNyqzj3w4Jz2UxU3VD',
+  BASE_WEB_URL: process.env.BASE_WEB_URL,
+  ONESIGNAL_APP_ID: 'd7644164-13e0-4f65-8901-dc89c4ef64de',
+  ONESIGNAL_APP_KEY: 'OWJiNzM1MDUtOWFiMy00YWIxLTlkOTYtM2I4NDUyNjNmY2Ri'
+}
