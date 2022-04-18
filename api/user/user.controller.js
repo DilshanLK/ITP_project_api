@@ -18,6 +18,7 @@ router.get('/:id', getByUser);
 router.post('/signup', validate('signUp'), signUp);
 router.post('/login', validate('login'), login);
 router.post('/admin/login', validate('login'), adminLogin);
+router.put('/:id', update);
 
 function validate(method) {
   switch (method) {
@@ -67,7 +68,6 @@ async function signUp(req, res) {
     const salt = bcrypt.genSaltSync(10);
     req.body.password = bcrypt.hashSync(req.body.password, salt);
 
-
     const existingUsers = await userService.getByEmail(req.body.email);
 
     if (existingUsers.length) {
@@ -80,11 +80,13 @@ async function signUp(req, res) {
       ...req.body,
     });
 
+    const token = createToken({ id: newUser._id });
+
     const newCleanUser = JSON.parse(JSON.stringify(newUser));
 
     return res
       .status(200)
-      .json(success('OK', { user: newCleanUser }, res.statusCode));
+      .json(success('OK', { user: newCleanUser, token }, res.statusCode));
   } catch (e) {
     return res.status(500).json(error(e.message));
   }
@@ -99,8 +101,14 @@ async function login(req, res) {
   }
 
   const users = await userService.getByEmail(req.body.email);
+  console.log('user', users);
+
   if (!users.length || !users[0].password) {
     return res.status(404).json(validation([{ msg: 'Invalid credentials!' }]));
+  }
+
+  if (users[0].isDeleted) {
+    return res.status(400).json(validation([{ msg: 'Account not found!!' }]));
   }
 
   if (!bcrypt.compareSync(req.body.password, users[0].password)) {
@@ -227,6 +235,25 @@ async function getByUser(req, res) {
     }
 
     return res.status(200).json(success('OK', user, res.statusCode));
+  } catch (e) {
+    return res.status(500).json(error(e.message));
+  }
+}
+
+async function update(req, res) {
+  try {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(422).json(validation(errors.array()));
+      return;
+    }
+
+    const user = req.body;
+
+    const updatedUser = await userService.update(user, req.params.id);
+
+    return res.status(200).json(success('OK', updatedUser, res.statusCode));
   } catch (e) {
     return res.status(500).json(error(e.message));
   }
